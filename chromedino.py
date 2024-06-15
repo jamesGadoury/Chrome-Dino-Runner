@@ -55,6 +55,8 @@ CLOUD = pygame.image.load(os.path.join("assets/Other", "Cloud.png"))
 BG = pygame.image.load(os.path.join("assets/Other", "Track.png"))
 
 FONT_COLOR=(0,0,0)
+MENU_COLOR=(0,0,0)
+BACKGROUND_COLOR=(0,0,0)
 
 class Dinosaur:
 
@@ -306,26 +308,37 @@ def main():
 
 def menu(death_count, cycle_time=False):
     global points
-    global BACKGROUND_COLOR
-    global FONT_COLOR
+
+    def light_mode():
+        global MENU_COLOR
+        global BACKGROUND_COLOR
+        global FONT_COLOR
+
+        FONT_COLOR=(0,0,0)
+        MENU_COLOR=((255, 255, 255))
+        BACKGROUND_COLOR=((255, 255, 255))
+
+    def dark_mode():
+        global MENU_COLOR
+        global BACKGROUND_COLOR
+        global FONT_COLOR
+
+        FONT_COLOR=(255,255,255)
+        MENU_COLOR=((128, 128, 128))
+        BACKGROUND_COLOR=((0, 0, 0))
+
     if cycle_time:
         current_time = datetime.datetime.now().hour
         if 7 < current_time < 19:
-            # light mode
-            FONT_COLOR=(0,0,0)
-            BACKGROUND_COLOR=((255, 255, 255))
+            light_mode()
         else:
-            # dark mode
-            FONT_COLOR=(255,255,255)
-            BACKGROUND_COLOR=((128, 128, 128))
+            dark_mode()
     else:
-        # Default to dark mode
-        FONT_COLOR=(255,255,255)
-        BACKGROUND_COLOR=((128, 128, 128))
+        dark_mode()
 
     run = True
     while run:
-        SCREEN.fill(BACKGROUND_COLOR)
+        SCREEN.fill(MENU_COLOR)
         font = pygame.font.Font("freesansbold.ttf", 30)
 
         if death_count == 0:
