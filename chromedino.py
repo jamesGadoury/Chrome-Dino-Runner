@@ -7,6 +7,10 @@ import threading
 
 import pygame
 
+from argparse import ArgumentParser
+
+from pathlib import Path
+
 pygame.init()
 
 # Global Constants
@@ -204,13 +208,18 @@ def main():
     death_count = 0
     pause = False
 
+    score_pth = Path("./score.txt")
+    if not score_pth.exists():
+        with open(score_pth, "w") as f:
+            f.write("0")
+
     def score():
         global points, game_speed
         points += 1
         if points % 100 == 0:
             game_speed += 1
         current_time = datetime.datetime.now().hour
-        with open("score.txt", "r") as f:
+        with open(score_pth, "r") as f:
             score_ints = [int(x) for x in f.read().split()]  
             highscore = max(score_ints)
             if points > highscore:
@@ -261,11 +270,8 @@ def main():
                 run = False
                 paused()
 
-        current_time = datetime.datetime.now().hour
-        if 7 < current_time < 19:
-            SCREEN.fill((255, 255, 255))
-        else:
-            SCREEN.fill((0, 0, 0))
+        SCREEN.fill(BACKGROUND_COLOR)
+        
         userInput = pygame.key.get_pressed()
 
         player.draw(SCREEN)
@@ -298,18 +304,28 @@ def main():
         pygame.display.update()
 
 
-def menu(death_count):
+def menu(death_count, cycle_time=False):
     global points
+    global BACKGROUND_COLOR
     global FONT_COLOR
-    run = True
-    while run:
+    if cycle_time:
         current_time = datetime.datetime.now().hour
         if 7 < current_time < 19:
+            # light mode
             FONT_COLOR=(0,0,0)
-            SCREEN.fill((255, 255, 255))
+            BACKGROUND_COLOR=((255, 255, 255))
         else:
+            # dark mode
             FONT_COLOR=(255,255,255)
-            SCREEN.fill((128, 128, 128))
+            BACKGROUND_COLOR=((128, 128, 128))
+    else:
+        # Default to dark mode
+        FONT_COLOR=(255,255,255)
+        BACKGROUND_COLOR=((128, 128, 128))
+
+    run = True
+    while run:
+        SCREEN.fill(BACKGROUND_COLOR)
         font = pygame.font.Font("freesansbold.ttf", 30)
 
         if death_count == 0:
@@ -350,5 +366,8 @@ def menu(death_count):
                 main()
 
 
-t1 = threading.Thread(target=menu(death_count=0), daemon=True)
+cli = ArgumentParser()
+cli.add_argument("--cycle-time", action="store_true", default=False)
+args = cli.parse_args()
+t1 = threading.Thread(target=menu(death_count=0, cycle_time=args.cycle_time), daemon=True)
 t1.start()
